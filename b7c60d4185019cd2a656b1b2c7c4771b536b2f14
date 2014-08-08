@@ -1,0 +1,236 @@
+Vienna 2.0 Database Format
+This document explains the Vienna 2.0 database and how it is managed by the application. The information here can be useful if you wish to read the database contents externally.
+
+The policy for support for third party applications that work directly against the Vienna 2.0 database is that read-only access is fully supported while read-write access is acceptable as long as you know what you are doing.
+
+Schema Overview
+Vienna uses SQLite 3 as the database engine. The actual version of the database engine can vary with each release.
+
+The database uses several tables. The following sections document the tables and the semantics of each field. The schema version number in which each field first appeared is also documented.
+
+Info Table
+The Info table contains the database version information. When Vienna starts, it looks for this table and if it is absent, it tries to create all the other tables.
+
+The version field is used to determine if Vienna needs to perform an upgrade on the database. If the version is equal to or above the minimum schema supported but less than the current schema, Vienna will prompt the user whether to upgrade the database. If the user affirms the upgrade then it will automatically perform the necessary adjustments while preserving the existing data and then bump up the version field to the current schema version.
+
+Name
+Version
+Description
+version
+12
+The schema version number of this database. When the database schema is changed, this number is incremented.
+
+For Vienna 2.0, the schema version number is 12 and the minimum supported schema version is also 12.
+last_opened
+12
+The date when the database was last opened for writing. This is only used for informational purposes so the format is not specified or fixed.
+
+
+Folders Table
+The Folders table lists all folders in the database. Each folder may be one of four types: a smart folder, an RSS feed, a group folder or the one and only Trash folder. The Folders table stores the common elements for each of these tables and can be thought as the ‘base’ table. Smart folders and RSS folders use separate tables to store additional information.
+
+Name
+Version
+Description
+folder_id
+12
+The ID of this folder. This is an auto-increment field.
+parent_id
+12
+The ID of the folder that contains this folder. Root level folders have no parent and thus this value is -1.
+foldername
+12
+The name of this folder. The folder name should be unique across ALL folders. Vienna automatically handles duplicates by appending a numeric specifier to the second and subsequent occurrence of the duplicate name. Applications that write directly to the folders table need to do the same. Strange things can happen if there’s more than one folder with the same name.
+unread_count
+12
+The count of unread messages in this folder. This field is computed by Vienna based on the unread count of each message. For performance reasons we cache this count here but it is worth noting that there can be circumstances where the unread count on the folder can get out of sync with the actual number of unread messages. When this happens, Vienna will automatically fix up the unread count on the folder.
+last_update
+12
+The date when the most recent article was added to the folder. This is generally only relevant for feed folders. Smart folders and group folders do not use this field.
+type
+12
+The type of the folder. This is the field that determines what the folder contains. Permissible values are:
+
+2 =Smart folder. The folder contents are computed dynamically. The smart folder criteria is stored in the separate smart_folders table.
+
+3= Group folder. This folder is merely a container for other folders.
+
+4= Feed folder. This folder contains RSS/Atom subscriptions. The actual feed details are stored in the separate rss_folders table.
+
+5=Trash folder. This is a virtual folder that acts as a pseudo-smart folder which displays all articles that have the deleted_flag field set to 1.
+flags
+12
+This is a generic flag field used by Vienna to store extra information associated with the folder. Currently only the following values are recognised:
+
+1 = This folder needs an image. On the next refresh, Vienna will attempt to retrieve the folder image.
+
+2 = This folder needs credentials. On the next refresh, Vienna will prompt for credentials before it accesses the feed.
+
+(Note that the flags above are only valid if the folder is a feed folder. Arguably the settings should be in the rss_folders table but they’re here for now).
+
+Note: The folder_id is referenced by messages in the Messages table. If you delete a folder, you should do something with the messages that reference it. Vienna will typically just delete all messages. Failure to delete messages will leave orphan messages in the database which can be cleaned up later by a separate process.
+
+Messages Table
+The Messages table is where all articles are stored.
+
+Name
+Version
+Description
+message_id
+12
+The ID of the message. This is actually a GUID string that references a specific article and should be considered unique.
+folder_id
+12
+The ID of this folder where this message is stored.
+parent_id
+12
+The ID of the message to which this is a comment. If this message starts a new thread then the value of this field is -1. (Note: Vienna 2.0 doesn’t use this field).
+sender
+12
+The name of the person who posted this message.
+date
+12
+The date of the message expressed as the number of seconds offset since 1st January 1970, 00:00 GMT.
+title
+12
+The message title. This is the first line of a comment for services where comments have no explicit subject line.
+link
+12
+The link associated with this article. Typically the URL of the original article on the web.
+unread_flag
+12
+A Boolean that is YES if the message is unread, NO otherwise.
+marked_flag
+12
+A Boolean that is YES if the message is marked, NO otherwise.
+deleted_flag
+12
+A Boolean that is YES if the message is deleted, NO otherwise. All messages in the Trash folder are simply all those messages in this table which have the deleted_flag set to YES.
+text
+12
+The message text. This is pretty much a blob of text that may or may not have HTML within it.
+
+Smart_folders Table
+The Smart_folders table stores the criteria for every smart folder.
+
+Name
+Version
+Description
+folder_id
+12
+The ID of the folder to which this smart folder criteria is associated. The folder must have type=2.
+search_string
+12
+This is the XML text that defines the smart folder criteria. The format is documented below.
+
+A smart folder criteria is stored as an XML string that adheres to the following schema:
+
+<criteriagroup condition=[all|any]>
+	<criteria field=”fieldname”>
+		<operator>[operatorvalue]</operator>
+		<value>[criteriavalue]</value>
+	</criteria>
+</criteriagroup>
+
+There may be multiple <criteria> blocks within a criteriagroup. If the condition is all, every criteria block has to match otherwise at least one criteria block has to match for the criteria to succeed.
+
+The [operatorvalue] is an integer that represents the operator applied to the field and value. It must be one of the following:
+
+Value	Operation
+Is
+Is Not
+Is Less Than
+Is Greater Than
+Is Less Than or Equal
+Is Greater Than or Equal
+Contains
+Not Contains
+Is Before
+Is After
+Is On or Before
+Is On or After
+
+Note that ‘Is Before’ and ‘Is Less Than’ are semantically equivalent but are given different values for clarity. Also ‘Is’ and ‘Is Equal’ are synonymous as are ‘Is Not’ and ‘Is Not Equal’.
+
+If the field is a date then the value field is a date represented as the number of seconds since 1st January 1970, 00:00 GMT. This representation simplifies portability and arithmetic. This is also the representation of dates of articles in the message table.
+
+Vienna automatically converts each criteriagroup to the corresponding SQL statements when it queries for all articles in a smart folder.
+
+Rss_folders Table
+The Rss_folders table extends the folders table with additional information that describes an RSS/Atom feed.
+
+Name
+Version
+Description
+folder_id
+12
+The ID of the folder to which this smart folder criteria is associated. The folder must have type=4.
+feed_url
+12
+The URL of the RSS/Atom feed itself.
+username
+12
+If this feed requires authentication then this stores the user name portion of the credentials. The password is NOT stored in this table but instead is obtained from the OS keychain using the feed URL and username as references.
+last_update_string
+12
+This is the date of the last update extracted directly from the “Last-Modified” field of HTTP header of the feed data. It is stored as a string as the host server expects the “If-Modified-Since” date string to be in the same format as its “Last-Modified” string.
+description
+12
+The feed’s description. Vienna doesn’t presently display this but it is here for future reference.
+home_page
+12
+The URL of the feed’s home page. This is distinct from the URL of the feed itself.
+bloglines_id
+12
+The ID of this feed as stored on Bloglines. Vienna doesn’t presently use this information but it is here for future reference.
+
+
+Messages_folder_idx Index
+Vienna creates an index on the Messages table using the folder_id column.
+
+Database Management
+Vienna uses a singleton Database object to manage access to the database. The following code obtains a reference to the database object:
+
+Database * db = [Database sharedDatabase];
+
+The database management code is in both database.h and database.m in the Vienna source code.
+
+The process of obtaining the reference may cause the database object to be initialised and a message panel to be displayed if any errors are encountered. Thus Vienna intentionally obtains a reference when it initialises the UI as so to control the point at which the database initialisation itself occurs.
+
+The process of initialising the database object is as follows:
+
+Vienna obtains the name and path of the database file from the preferences via the DefaultDatabase setting. This setting can be used to locate the database in a folder other than the default.
+Vienna checks that the database folder itself is present and creates it otherwise. If it cannot create the folder, it reports an error and sets the database reference to NIL.
+Vienna calls SQLite to open the database. If this fails, it reports an error and exits.
+It then queries the Info table for the version field. If this returns no results then it assumes the database is empty.
+It then checks whether the version is equal to or greater than the minimum supported version. If it is less, it reports via an error panel that it does not recognise the database format.
+Otherwise if the version is less than the current supported version, it prompts the user whether they want to upgrade the database or create a new database in the current format.
+Whether the user elects to upgrade or create a new database, it saves a copy of the old database in the same folder as the current one but with the “.bak” extension appended to the database file name.
+If the user elects to create a new database, it simply deletes the current one after the backup.
+If creating a new database, it tries to create the Info table. If this fails due to a SQLITE_LOCKED error then it assumes the user is trying to create the database on a remote network folder. This isn’t supported by the version of SQLite that ships with Vienna 2.0 so Vienna reports an error panel and prompts the user to find an alternative location for the database. Once it has the new location, it tries to create the database there and repeats the process of creating the Info table. If this new location still reports SQLITE_LOCKED, it goes through the same error panel motions again.
+Assuming that the Info table is successfully created, it creates all the other tables and the index, and then it stamps the database version into the Info table.
+As part of creating the schema, it also creates the initial smart folders: “Marked Articles”, “Unread Articles” and “Today’s Articles”. It also creates the Trash folder.
+If Vienna needs to upgrade the database, it uses the current database schema version to determine what tables need to be modified.
+Finally, it updates the last_opened field in the Info table. If this fails then it assumes the database is read-only. It sets an internal flag that the rest of Vienna uses to constrain what the user can do in the current session (i.e. no actions that would write to the database are allowed).
+
+By the time the database has been fully initialised, Vienna can now start querying against the database object.
+
+
+
+
+
+
+
+
+
+	 FILENAME Database Schema.doc
+
+
+	 PAGE 2
+
+
+
+	 PAGE 1
+
+
+
