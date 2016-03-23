@@ -68,6 +68,7 @@
 #import "Database.h"
 #import "BJRWindowWithToolbar.h"
 #import "NSURL+Utils.h"
+#import "VNAUserNotificationController.h"
 
 
 @interface AppController (Private)
@@ -113,7 +114,6 @@
 	-(void)updateCloseCommands;
 	@property (nonatomic, getter=isFilterBarVisible, readonly) BOOL filterBarVisible;
 	@property (nonatomic, getter=isStatusBarVisible, readonly) BOOL statusBarVisible;
-	@property (nonatomic, readonly, copy) NSDictionary *registrationDictionaryForGrowl;
 	@property (nonatomic, readonly, strong) NSTimer *checkTimer;
 	-(ToolbarItem *)toolbarItemWithIdentifier:(NSString *)theIdentifier;
 	-(void)searchArticlesWithString:(NSString *)searchString;
@@ -522,23 +522,6 @@ static void MySleepCallBack(void * refCon, io_service_t service, natural_t messa
 	
 	// Add the app to the status bar if needed.
 	[self showAppInStatusBar];
-	
-	// Growl initialization
-	NSBundle *mainBundle = [NSBundle mainBundle];
-	NSString *path = [mainBundle.privateFrameworksPath stringByAppendingPathComponent:@"Growl.framework"];
-	LOG_NS(@"path: %@", path);
-	NSBundle *growlFramework = [NSBundle bundleWithPath:path];
-	if([growlFramework load])
-	{
-		NSDictionary *infoDictionary = growlFramework.infoDictionary;
-		LOG_NS(@"Using Growl.framework %@ (%@)",
-			  infoDictionary[@"CFBundleShortVersionString"],
-			  infoDictionary[(NSString *)kCFBundleVersionKey]);
-
-		Class GAB = NSClassFromString(@"GrowlApplicationBridge");
-		if([GAB respondsToSelector:@selector(setGrowlDelegate:)])
-			[GAB performSelector:@selector(setGrowlDelegate:) withObject:self];
-	}
 	
 	// Start the check timer
 	[self handleCheckFrequencyChange:nil];
@@ -1660,7 +1643,7 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
  */
 -(void)growlNotify:(id)notifyContext title:(NSString *)title description:(NSString *)description notificationName:(NSString *)notificationName
 {
-	Class GAB = NSClassFromString(@"GrowlApplicationBridge");
+	/* Class GAB = NSClassFromString(@"GrowlApplicationBridge");
 	if([GAB respondsToSelector:@selector(notifyWithTitle:description:notificationName:iconData:priority:isSticky:clickContext:identifier:)])
 					[GAB setShouldUseBuiltInNotifications:NO];
 					[GAB		notifyWithTitle:title
@@ -1669,57 +1652,60 @@ withReplyEvent:(NSAppleEventDescriptor *)replyEvent
 									   iconData:nil
 									   priority:0
 									   isSticky:NO
-								   clickContext:notifyContext];
+								   clickContext:notifyContext]; */
+    
+    [VNAUserNotificationController notificationWithTitle:title description:description];
+    
 }
 
 /* growlNotificationWasClicked
  * Called when the user clicked a Growl notification balloon.
  */
--(void)growlNotificationWasClicked:(id)clickContext
-{
-	NSDictionary * contextDict = (NSDictionary *)clickContext;
-	NSInteger contextValue = [[contextDict valueForKey:@"ContextType"] integerValue];
-	
-	if (contextValue == MA_GrowlContext_RefreshCompleted)
-	{
-		[self openVienna:self];
-		Folder * unreadArticles = [db folderFromName:NSLocalizedString(@"Unread Articles", nil)];
-		if (unreadArticles != nil)
-			[foldersTree selectFolder:unreadArticles.itemId];
-		return;
-	}
-	
-	// Successful download - show file in Finder. If we fail then we don't
-	// care. Definitely don't want to be popping up an error dialog.
-	if (contextValue == MA_GrowlContext_DownloadCompleted)
-	{
-		NSString * pathToFile = [contextDict valueForKey:@"ContextData"];
-		[[NSWorkspace sharedWorkspace] selectFile:pathToFile inFileViewerRootedAtPath:@""];
-		return;
-	}
-}
+//-(void)growlNotificationWasClicked:(id)clickContext
+//{
+//	NSDictionary * contextDict = (NSDictionary *)clickContext;
+//	NSInteger contextValue = [[contextDict valueForKey:@"ContextType"] integerValue];
+//	
+//	if (contextValue == MA_GrowlContext_RefreshCompleted)
+//	{
+//		[self openVienna:self];
+//		Folder * unreadArticles = [db folderFromName:NSLocalizedString(@"Unread Articles", nil)];
+//		if (unreadArticles != nil)
+//			[foldersTree selectFolder:unreadArticles.itemId];
+//		return;
+//	}
+//	
+//	// Successful download - show file in Finder. If we fail then we don't
+//	// care. Definitely don't want to be popping up an error dialog.
+//	if (contextValue == MA_GrowlContext_DownloadCompleted)
+//	{
+//		NSString * pathToFile = [contextDict valueForKey:@"ContextData"];
+//		[[NSWorkspace sharedWorkspace] selectFile:pathToFile inFileViewerRootedAtPath:@""];
+//		return;
+//	}
+//}
 
 /* registrationDictionaryForGrowl
  * Called by Growl to request the notification dictionary.
  */
--(NSDictionary *)registrationDictionaryForGrowl
-{
-	
-	NSDictionary *notificationsWithDescriptions = @{NSLocalizedString(@"Growl refresh completed", ""): @"Growl refresh completed",
-		NSLocalizedString(@"Growl download completed", ""): @"Growl download completed",
-		NSLocalizedString(@"Growl download failed", ""): @"Growl download failed"};
-
-	NSArray *allNotesArray = notificationsWithDescriptions.allKeys;
-	NSArray *defNotesArray = [allNotesArray copy];
-	
-	NSDictionary *regDict = @{GROWL_APP_NAME: self.appName, 
-							 GROWL_NOTIFICATIONS_ALL: allNotesArray, 
-							 GROWL_NOTIFICATIONS_DEFAULT: defNotesArray,
-							 GROWL_NOTIFICATIONS_HUMAN_READABLE_NAMES: notificationsWithDescriptions};
-
-
-	return regDict;
-}
+//-(NSDictionary *)registrationDictionaryForGrowl
+//{
+//	
+//	NSDictionary *notificationsWithDescriptions = @{NSLocalizedString(@"Growl refresh completed", ""): @"Growl refresh completed",
+//		NSLocalizedString(@"Growl download completed", ""): @"Growl download completed",
+//		NSLocalizedString(@"Growl download failed", ""): @"Growl download failed"};
+//
+//	NSArray *allNotesArray = notificationsWithDescriptions.allKeys;
+//	NSArray *defNotesArray = [allNotesArray copy];
+//	
+//	NSDictionary *regDict = @{GROWL_APP_NAME: self.appName, 
+//							 GROWL_NOTIFICATIONS_ALL: allNotesArray, 
+//							 GROWL_NOTIFICATIONS_DEFAULT: defNotesArray,
+//							 GROWL_NOTIFICATIONS_HUMAN_READABLE_NAMES: notificationsWithDescriptions};
+//
+//
+//	return regDict;
+//}
 
 /* initSortMenu
  * Create the sort popup menu.

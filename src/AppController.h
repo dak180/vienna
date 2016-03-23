@@ -22,7 +22,6 @@
 #import "Database.h"
 #import "ArticleController.h"
 #import "ActivityViewer.h"
-#import <Growl/Growl.h>
 #import "DownloadWindow.h"
 #import "FilterView.h"
 #import "PopupButton.h"
@@ -46,7 +45,7 @@
 @class BJRWindowWithToolbar;
 @class TreeFilterView;
 
-@interface AppController : NSObject <NSApplicationDelegate, GrowlApplicationBridgeDelegate,NSWindowDelegate,NSToolbarDelegate,NSSplitViewDelegate,NSMenuDelegate>
+@interface AppController : NSObject <NSApplicationDelegate, NSWindowDelegate, NSToolbarDelegate,NSSplitViewDelegate, NSMenuDelegate>
 {
 	IBOutlet BJRWindowWithToolbar * mainWindow;
 	IBOutlet ArticleController * articleController;

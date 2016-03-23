@@ -62,6 +62,7 @@
 		030C38901AABF12D00AE1EB8 /* FolderImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 030C388F1AABF12D00AE1EB8 /* FolderImageCache.m */; };
 		031E083019DFA3A900194F9F /* SubscriptionModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 031E082F19DFA3A900194F9F /* SubscriptionModel.m */; };
 		032280311A33BCD8007DE933 /* Article.m in Sources */ = {isa = PBXBuildFile; fileRef = 032280301A33BCD8007DE933 /* Article.m */; };
+		0330D2A61CA24DB000D1C0B0 /* VNAUserNotificationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0330D2A51CA24DB000D1C0B0 /* VNAUserNotificationController.m */; };
 		03493D1A1A303BF700AA3F36 /* SyncingPreferencesView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 03493D1C1A303BF700AA3F36 /* SyncingPreferencesView.xib */; };
 		03493D2F1A303C1000AA3F36 /* AdvancedPreferencesView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 03493D311A303C1000AA3F36 /* AdvancedPreferencesView.xib */; };
 		0349813E1A206FD900014F29 /* GeneralPreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0349813D1A206FD900014F29 /* GeneralPreferencesViewController.m */; };
@@ -106,8 +107,6 @@
 		3A7BD0DD1989AC7700E9444B /* BJRVerticallyCenteredTextFieldCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A7BD0DC1989AC7700E9444B /* BJRVerticallyCenteredTextFieldCell.m */; };
 		3A8A344D17857D3B00E2E64B /* KnownSyncServers.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3A8A344B17857D3B00E2E64B /* KnownSyncServers.plist */; };
 		3A8E2EBD16EBB356001DFDD6 /* vienna-3.icns in Resources */ = {isa = PBXBuildFile; fileRef = 57B1721116E9665500C011C9 /* vienna-3.icns */; };
-		3A9903951993638900EA69B2 /* Growl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A9903941993638900EA69B2 /* Growl.framework */; };
-		3A990396199363BE00EA69B2 /* Growl.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = 3A9903941993638900EA69B2 /* Growl.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		3AEE7DE91695FC570018A17D /* vienna_public_key.pem in Resources */ = {isa = PBXBuildFile; fileRef = 3AEE7DE81695FC570018A17D /* vienna_public_key.pem */; };
 		3AFF601819A07F5A0036DBA4 /* BJRWindowWithToolbar.m in Sources */ = {isa = PBXBuildFile; fileRef = 3AFF601619A07F5A0036DBA4 /* BJRWindowWithToolbar.m */; };
 		430C4ADE166175A00079C9FC /* blankPopupMenuButton.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 430C4ADC166175A00079C9FC /* blankPopupMenuButton.tiff */; };
@@ -754,7 +753,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				3A990396199363BE00EA69B2 /* Growl.framework in Copy Frameworks */,
 				43BA97E01664767C00B95F35 /* DisclosableView.framework in Copy Frameworks */,
 				43501F8F165DC5BC0018EDB7 /* PSMTabBarControl.framework in Copy Frameworks */,
 			);
@@ -782,6 +780,8 @@
 		031E082F19DFA3A900194F9F /* SubscriptionModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SubscriptionModel.m; path = src/SubscriptionModel.m; sourceTree = "<group>"; };
 		0322802F1A33BCD8007DE933 /* Article.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Article.h; path = src/models/Article.h; sourceTree = "<group>"; };
 		032280301A33BCD8007DE933 /* Article.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Article.m; path = src/models/Article.m; sourceTree = "<group>"; };
+		0330D2A41CA24DB000D1C0B0 /* VNAUserNotificationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VNAUserNotificationController.h; path = src/VNAUserNotificationController.h; sourceTree = "<group>"; };
+		0330D2A51CA24DB000D1C0B0 /* VNAUserNotificationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VNAUserNotificationController.m; path = src/VNAUserNotificationController.m; sourceTree = "<group>"; };
 		03493D1B1A303BF700AA3F36 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/SyncingPreferencesView.xib; sourceTree = "<group>"; };
 		03493D1D1A303BFA00AA3F36 /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ja; path = ja.lproj/SyncingPreferencesView.xib; sourceTree = "<group>"; };
 		03493D1E1A303BFA00AA3F36 /* fr */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = fr; path = fr.lproj/SyncingPreferencesView.xib; sourceTree = "<group>"; };
@@ -913,7 +913,6 @@
 		3A7BD0DB1989AC7700E9444B /* BJRVerticallyCenteredTextFieldCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BJRVerticallyCenteredTextFieldCell.h; path = 3rdparty/BJRVerticallyCenteredTextFieldCell/BJRVerticallyCenteredTextFieldCell.h; sourceTree = "<group>"; };
 		3A7BD0DC1989AC7700E9444B /* BJRVerticallyCenteredTextFieldCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BJRVerticallyCenteredTextFieldCell.m; path = 3rdparty/BJRVerticallyCenteredTextFieldCell/BJRVerticallyCenteredTextFieldCell.m; sourceTree = "<group>"; };
 		3A8A344C17857D3B00E2E64B /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = zh_TW; path = KnownSyncServers.plist; sourceTree = "<group>"; };
-		3A9903941993638900EA69B2 /* Growl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Growl.framework; path = 3rdparty/Growl.framework; sourceTree = "<group>"; };
 		3ABA673414C7536D00251925 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		3AEE7DE81695FC570018A17D /* vienna_public_key.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = vienna_public_key.pem; path = signing/vienna_public_key.pem; sourceTree = "<group>"; };
 		3AFC9FEF152B7AF2004B0537 /* libSystem.B.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libSystem.B.dylib; path = usr/lib/libSystem.B.dylib; sourceTree = SDKROOT; };
@@ -1631,7 +1630,6 @@
 				F0E01EF817C885A900E20329 /* libsqlite3.dylib in Frameworks */,
 				EACE4C90147FA2B000A17997 /* PSMTabBarControl.framework in Frameworks */,
 				435021CE165DCB980018EDB7 /* Carbon.framework in Frameworks */,
-				3A9903951993638900EA69B2 /* Growl.framework in Frameworks */,
 				435021D0165DCB980018EDB7 /* Cocoa.framework in Frameworks */,
 				435021D2165DCB980018EDB7 /* IOKit.framework in Frameworks */,
 				435021D4165DCB980018EDB7 /* Security.framework in Frameworks */,
@@ -1763,6 +1761,8 @@
 				4350284A165DE9DF0018EDB7 /* ActivityViewer.m */,
 				4350284B165DE9DF0018EDB7 /* AppController.h */,
 				4350284C165DE9DF0018EDB7 /* AppController.m */,
+				0330D2A41CA24DB000D1C0B0 /* VNAUserNotificationController.h */,
+				0330D2A51CA24DB000D1C0B0 /* VNAUserNotificationController.m */,
 				4350284D165DE9DF0018EDB7 /* ArticleBaseView.h */,
 				3A4DBEC51733C206006DD2AB /* ArticleCellView.h */,
 				3A4DBEC61733C206006DD2AB /* ArticleCellView.m */,
@@ -1887,7 +1887,6 @@
 		43501F70165DB92B0018EDB7 /* External frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3A9903941993638900EA69B2 /* Growl.framework */,
 				EACE4C8E147FA2B000A17997 /* PSMTabBarControl.framework */,
 			);
 			name = "External frameworks";
@@ -3871,6 +3870,7 @@
 				435028BA165DE9E00018EDB7 /* XMLSourceWindow.m in Sources */,
 				3A7BD0DD1989AC7700E9444B /* BJRVerticallyCenteredTextFieldCell.m in Sources */,
 				43BA97FE1664804E00B95F35 /* DSClickableURLTextField.m in Sources */,
+				0330D2A61CA24DB000D1C0B0 /* VNAUserNotificationController.m in Sources */,
 				3A4DBEC71733C207006DD2AB /* ArticleCellView.m in Sources */,
 				37C650801816EBAD3C0D9DBF /* NSURL+Utils.m in Sources */,
 			);
